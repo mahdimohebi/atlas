@@ -8,6 +8,7 @@ class AluminumExpense extends Model
 {
     protected $fillable = [
         'expense_type',
+        'transaction_type',
         'date',
         'price',
         'notes',

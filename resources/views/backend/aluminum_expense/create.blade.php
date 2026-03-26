@@ -9,7 +9,13 @@
                 <nav>
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="javascript:void(0);">صفحات</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">ثبت مصرف آلومینیوم</li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                        @if($type == 'sell_expense')
+                            ثبت مصرف فروش
+                        @elseif($type == 'purchase_expense')
+                            ثبت مصرف خرید
+                        @endif    
+                        </li>
                     </ol>
                 </nav>
             </div>
@@ -35,7 +41,7 @@
                         <form action="{{ route('aluminum_expenses.store') }}" method="POST">
                             @csrf
                             <div class="row gy-4">
-
+                                <input type="hidden" name="type" value="{{ $type }}">
                                 <!-- نوع مصرف -->
                                 <div class="col-md-6 col-sm-12">
                                     <label class="form-label">نوع مصرف</label>

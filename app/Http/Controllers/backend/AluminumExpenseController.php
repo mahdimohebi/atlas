@@ -12,23 +12,34 @@ class AluminumExpenseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+
+
+
+    public function index(Request $request)
     {
-        // آخرین مصارف آلومینیوم، ۱۰ ردیف در هر صفحه
-        $expenses = AluminumExpense::orderBy('date', 'desc')->paginate(10);
+        $type = $request->type;
 
-        // بازگرداندن view اصلی
-        return view('backend.aluminum_expense.index', compact('expenses'));
+        $query = AluminumExpense::query();
+
+        if ($type == 'sell_expense') {
+            $query->where('transaction_type', 'sale');
+        } elseif ($type == 'purchase_expense') {
+            $query->where('transaction_type', 'purchase');
+        }
+
+        $expenses = $query->orderBy('date', 'desc')->paginate(10);
+
+        return view('backend.aluminum_expense.index', compact('expenses', 'type'));
     }
-
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
+        $type = $request->type;
         // نمایش فرم ثبت مصرف آلومینیوم
-        return view('backend.aluminum_expense.create');
+        return view('backend.aluminum_expense.create', compact('type'));
     }
 
     /**
@@ -54,6 +65,7 @@ class AluminumExpenseController extends Controller
         // ایجاد رکورد جدید
         AluminumExpense::create([
             'expense_type' => $request->expense_type,
+            'transaction_type' => $request->type == 'sell_expense' ? 'sale' : 'purchase',
             'date' => $request->date,
             'price' => persianToEnglishNumber($request->price),
             'notes' => $request->notes
@@ -61,7 +73,7 @@ class AluminumExpenseController extends Controller
 
         // نمایش پیام موفقیت و ریدایرکت به صفحه لیست
         Session::flash('success', 'مصرف آلومینیوم با موفقیت ثبت شد.');
-        return redirect()->route('aluminum_expenses.index');
+        return redirect()->route('aluminum_expenses.index', ['type' => $request->type]);
     }
 
 
@@ -80,9 +92,9 @@ class AluminumExpenseController extends Controller
     {
         // پیدا کردن مصرف آلومینیوم بر اساس ID
         $expense = AluminumExpense::findOrFail($id);
-
+        $type = $expense->transaction_type == 'sale' ? 'sell_expense' : 'purchase_expense';
         // نمایش فرم ویرایش و ارسال داده‌ها به Blade
-        return view('backend.aluminum_expense.edit', compact('expense'));
+        return view('backend.aluminum_expense.edit', compact('expense','type'));
     }
 
 
@@ -115,6 +127,7 @@ class AluminumExpenseController extends Controller
         // بروزرسانی رکورد
         $expense->update([
             'expense_type' => $request->expense_type,
+            'transaction_type' => $request->type == 'sell_expense' ? 'sale' : 'purchase',
             'date' => $request->date,
             'price' => $price,
             'notes' => $request->notes
@@ -122,7 +135,7 @@ class AluminumExpenseController extends Controller
 
         // پیام موفقیت و ریدایرکت
         Session::flash('success', 'مصرف آلومینیوم با موفقیت بروزرسانی شد.');
-        return redirect()->route('aluminum_expenses.index');
+        return redirect()->route('aluminum_expenses.index', ['type' => $request->type]);
     }
 
 
@@ -131,42 +144,21 @@ class AluminumExpenseController extends Controller
      */
     public function destroy($id)
     {
-        // پیدا کردن رکورد یا ارور 404
         $expense = AluminumExpense::findOrFail($id);
 
-        // حذف رکورد
+        // تشخیص type قبل از حذف
+        $type = $expense->transaction_type == 'sale' ? 'sell_expense' : 'purchase_expense';
+
         $expense->delete();
 
-        // پاسخ JSON برای AJAX
         return response()->json([
             'success' => true,
-            'message' => 'مصرف آلومینیوم با موفقیت حذف شد.'
+            'message' => 'مصرف آلومینیوم با موفقیت حذف شد.',
+            'type' => $type
         ]);
     }
 
 
-    public function search(Request $request)
-    {
-        $query = $request->get('query');
-
-        // جستجو بر اساس نوع مصرف، یادداشت و تاریخ
-        $expenses = AluminumExpense::where('expense_type', 'like', "%{$query}%")
-                    ->orWhere('notes', 'like', "%{$query}%")
-                    ->orWhere('date', 'like', "%{$query}%")
-                    ->orderBy('date', 'desc')
-                    ->paginate(10);
-
-        if ($request->ajax()) {
-            $table = view('backend.expenses.aluminum.table', compact('expenses'))->render();
-            $pagination = view('backend.expenses.aluminum.pagination', compact('expenses'))->render();
-            return response()->json([
-                'table' => $table,
-                'pagination' => $pagination
-            ]);
-        }
-
-        return view('backend.expenses.aluminum.index', compact('expenses'));
-    }
 
 
 }

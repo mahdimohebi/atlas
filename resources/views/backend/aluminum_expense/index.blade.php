@@ -21,9 +21,11 @@
                     <div class="card-body">
 
                         <!-- دکمه ثبت مصرف جدید -->
-                        <a href="{{ route('aluminum_expenses.create') }}" class="btn btn-primary mb-3">ثبت مصرف آلومینیوم</a>
-                        <input type="text" id="search" class="form-control mb-3" placeholder="جستجو در مصارف...">
-                        
+                        <a href="{{ route('aluminum_expenses.create', ['type' => $type]) }}" class="btn btn-primary mb-3">
+                            ثبت مصرف آلومینیوم
+                        </a>
+                        <input type="text" id="search" class="form-control mb-3" placeholder="جستجو در مصارف ...">
+
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped text-nowrap w-100">
                                 <thead>
@@ -54,32 +56,18 @@
 
 @section('script')
 <script>
-$(document).ready(function() {
-    function fetch_data(query = '', page = 1) {
-        $.ajax({
-            url: "{{ route('aluminum_expenses.search') }}",
-            type: 'GET',
-            data: { 
-                query: query, 
-                page: page 
-            },
-            success: function(data) {
-                $('#expense-data').html(data.table);
-                $('#pagination-links').html(data.pagination);
-            }
-        });
-    }
+function fa2en(str) {
+    if(!str) return '';
+    return str.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+              .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+}
 
-    $('#search').on('keyup', function() {
-        var query = $(this).val();
-        fetch_data(query, 1);
-    });
+$('#search').on('keyup', function() {
+    let value = fa2en($(this).val().toLowerCase().trim());
 
-    $(document).on('click', '#pagination-links a', function(e) {
-        e.preventDefault();
-        var page = $(this).attr('href').split('page=')[1];
-        var query = $('#search').val();
-        fetch_data(query, page);
+    $('#expense-data tr').each(function() {
+        let text = fa2en($(this).text().toLowerCase());
+        $(this).toggle(text.includes(value));
     });
 });
 </script>

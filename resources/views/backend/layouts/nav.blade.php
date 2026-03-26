@@ -52,6 +52,9 @@
 									<li class="slide">
 										<a href="{{route('payment.index', ['type' => 'purchase'])}}" class="side-menu__item">پرداختی ها</a>
 									</li>
+									<li class="slide">
+										<a href="{{route('aluminum_expenses.index', ['type' => 'purchase_expense'])}}" class="side-menu__item"> مصارف خرید</a>
+									</li>
 								</ul>
 							</li>
 			
@@ -76,6 +79,10 @@
 
 									<li class="slide">
 										<a href="{{route('payment.index', ['type' => 'sale'])}}" class="side-menu__item">پرداختی ها</a>
+									</li>
+
+									<li class="slide">
+										<a href="{{route('aluminum_expenses.index', ['type' => 'sell_expense'])}}" class="side-menu__item"> مصارف فروش</a>
 									</li>
 								</ul>
 							</li>
