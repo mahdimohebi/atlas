@@ -157,10 +157,11 @@ if ($filter === 'yearly') {
 
     $expense = AluminumExpense::where('date', '>=', $from)
         ->select(
-            DB::raw('YEAR(date) as date'), // از سال بعنوان date استفاده می‌کنیم
+            DB::raw('YEAR(date) as date'),
+            'transaction_type',
             DB::raw('SUM(price) as total')
         )
-        ->groupBy(DB::raw('YEAR(date)'))
+        ->groupBy(DB::raw('YEAR(date)'), 'transaction_type')
         ->orderBy('date')
         ->get();
 
@@ -169,9 +170,10 @@ if ($filter === 'yearly') {
     $expense = AluminumExpense::whereBetween('date', [$from, $to])
         ->select(
             DB::raw("DATE_FORMAT(date,'%Y-%m') as date"),
+            'transaction_type',
             DB::raw('SUM(price) as total')
         )
-        ->groupBy(DB::raw("DATE_FORMAT(date,'%Y-%m')"))
+        ->groupBy(DB::raw("DATE_FORMAT(date,'%Y-%m')"), 'transaction_type')
         ->orderBy('date')
         ->get();
 
@@ -180,17 +182,24 @@ if ($filter === 'yearly') {
     $expense = AluminumExpense::whereBetween('date', [$from, $to])
         ->select(
             DB::raw('DATE(date) as date'),
+            'transaction_type',
             DB::raw('SUM(price) as total')
         )
-        ->groupBy(DB::raw('DATE(date)'))
+        ->groupBy(DB::raw('DATE(date)'), 'transaction_type')
         ->orderBy('date')
         ->get();
 }
 
+$saleExpenses = $expense->where('transaction_type', 'sale')->values();
+$purchaseExpenses = $expense->where('transaction_type', 'purchase')->values();
 
 
-        $total_expense = $expense->sum('total');
-        $net_profit = $totalSalePaid - $totalPurchasePaid - $total_expense;
+
+        $totalSaleExpense = $saleExpenses->sum('total');
+        $totalPurchaseExpense = $purchaseExpenses->sum('total');
+        $total_expense = ($totalSaleExpense + $totalPurchaseExpense);
+
+        $net_profit = $totalSalePaid - $totalPurchasePaid - ($totalSaleExpense + $totalPurchaseExpense);
 
         /* =======================
          |  ALUMINUM (HARD / SOFT)
@@ -289,7 +298,8 @@ foreach (['hard','soft'] as $cat) {
             'purchasePayments',
             'salePayments',
             'expense',
-            'chart'
+            'chart',
+            'saleExpenses', 'purchaseExpenses'
         ));
     }
 }

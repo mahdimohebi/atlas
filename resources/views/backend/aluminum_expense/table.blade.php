@@ -1,7 +1,7 @@
 @foreach($expenses as $expense)
 <tr id="row-{{ $expense->id }}">
     <td>{{ $expense->expense_type }}</td>
-    <td>{{ \Carbon\Carbon::parse($expense->date)->format('Y-m-d') }}</td>
+    <td>{{ \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($expense->date))->format('Y/m/d') }}</td>
     <td>{{ number_format($expense->price) }}</td>
     <td>{{ $expense->notes }}</td>
     <td>

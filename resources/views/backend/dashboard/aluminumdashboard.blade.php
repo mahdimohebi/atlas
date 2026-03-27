@@ -101,16 +101,25 @@
         </div>
 
         <!-- ================= EXPENSE ================= -->
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <h6>گزارش مصارف</h6>
-                        <canvas id="expenseChart" height="120"></canvas>
-                    </div>
-                </div>
+<div class="row mt-3">
+    <div class="col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <h6>مصارف خرید</h6>
+                <canvas id="purchaseExpenseChart" height="120"></canvas>
             </div>
         </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <h6>مصارف فروش</h6>
+                <canvas id="saleExpenseChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 
     </div>
 </div>
@@ -222,11 +231,19 @@ new Chart(document.getElementById('alChart'), {
 
 /* ================= EXPENSE ================= */
 createBarChart(
-    'expenseChart',
-    {!! json_encode($expense->pluck('date')) !!},
-    {!! json_encode($expense->pluck('total')) !!},
-    'مصارف (افغانی)',
-    'rgba(255,159,64,0.6)'
+    'purchaseExpenseChart',
+    {!! json_encode($purchaseExpenses->pluck('date')) !!},
+    {!! json_encode($purchaseExpenses->pluck('total')) !!},
+    'مصارف خرید (AFN)',
+    'rgba(255,99,132,0.6)'
+);
+
+createBarChart(
+    'saleExpenseChart',
+    {!! json_encode($saleExpenses->pluck('date')) !!},
+    {!! json_encode($saleExpenses->pluck('total')) !!},
+    'مصارف فروش (AFN)',
+    'rgba(54,162,235,0.6)'
 );
 </script>
 
